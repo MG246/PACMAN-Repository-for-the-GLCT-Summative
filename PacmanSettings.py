@@ -7,6 +7,9 @@ Maze_width,Maze_height = WIDTH - Top_Bottom_Buffer, HEIGHT - Top_Bottom_Buffer
 
 FPS = 60
 
+ROWS = 30
+COLS = 28
+
 #colour settings more are to be added
 Red = (208, 22, 22)
 Black = (0, 0, 0)
