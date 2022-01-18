@@ -1,4 +1,4 @@
-from PacmanSettings import Black
+
 from pygame.math import Vector2 as vec
 
 
@@ -8,11 +8,14 @@ FPS = 60
 Top_Bottom_Buffer = 50
 Maze_width,Maze_height = WIDTH - Top_Bottom_Buffer, HEIGHT - Top_Bottom_Buffer
 
+
+ROWS = 30
+COLS = 28
 # our colour settings
-Black = (0,0,0)
-Red = (208, 22, 22)
-White = (8,9,8)
-Grey = (8,23,122)
+BLACK = (0,0,0)
+RED = (208, 22, 22)
+WHITE = (8,9,8)
+GREY = (8,23,122)
 # font settings
 
 START_TEXT_SIZE = 16
