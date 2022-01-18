@@ -73,6 +73,7 @@ class Player:
         if int(self.pix_pos.y+Top_Bottom_Buffer//2) % self.app.cell_height == 0:
             if self.direction == vec(0, 1) or self.direction == vec(0, -1) or self.direction == vec(0, 0):
                 return True
+            
     def can_move(self):
         for wall in self.app.walls:
             if vec(self.grid_pos+self.direction) == wall:
