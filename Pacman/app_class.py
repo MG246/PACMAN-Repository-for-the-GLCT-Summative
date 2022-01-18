@@ -1,6 +1,6 @@
 import pygame, sys, copy
 from settings import *
-from Player import *
+from PacmanPlayer import *
 from Pacman_enemy import *
 
 pygame.init()
@@ -18,10 +18,10 @@ class App:
         self.walls = []
         self.coins = []
         self.enemies = []
-        self.e_pos = 
+        self.e_pos = []
         self.p_pos = None
         self.load()
-        self.player = Player(self, self.p_pos)
+        self.player = Player(self, vec(self.p_pos))
         self.make_enemies()
         
     def run(self):
@@ -30,10 +30,14 @@ class App:
                 self.start_events()
                 self.start_update()
                 self.start_draw()
-            elif self.state == 'playing'
+            elif self.state == 'playing':
                 self.playing_events()
                 self.playing_update()
                 self.playing_draw()
+            elif self.state == 'game over':
+                self.game_over_events()
+                self.game_over_update()
+                self.game_over_draw()
             else:
                 self.running = False
             self.clock.tick(FPS)
@@ -42,7 +46,7 @@ class App:
 
 ########################## helper functions ################################
 
-    def draw_text(self, text, screen, pos, size, colour, font_name, centered = False):
+    def draw_text(self, words, screen, pos, size, colour, font_name, centered = False):
         font = pygame.font.SysFont(font_name, size)
         text = font.render(words, False, colour)
         text_size = text.get_size()
@@ -52,13 +56,13 @@ class App:
         screen.blit(text,pos)
    
     def load(self):
-        self.background = pygame.image.load('maze.png')
-        self.background = pygame.transform.scale(self.background, (MAZE_WIDTH, MAZE_HEIGHT))
+        self.background = pygame.image.load("maze.png")
+        self.background = pygame.transform.scale(self.background, (Maze_width, Maze_height))
         
         # Opening the walls file
         # creating walls list with co-ordinations of walls
         # placing the vectors
-        with open("walls.txt", 'r') as file:
+        with open("wall.txt", 'r') as file:
             for yidx, line in enumerate(file):
                 for xidx, char in enumerate(line):
                     if char == "1":
@@ -67,17 +71,16 @@ class App:
                         self.coins.append(vec(xidx, yidx))
                     elif char == "P":
                         self.p_pos = [xidx, yidx]
-                    #elif char in ["2", "3", "4", "5"]:
-                       # self.e_pos.append([xidx, yidx])
-                    #elif char == "B":
-                        #pygame.draw.rect(self.background, BLACK, (xidx*self.cell_width, yidx*self.cell_height,
-                                                                  self.cell_width, self.cell_height))
-        #print(len(self.walls))
-     def make_enemies(self):
+                    elif char in ["2", "3", "4", "5"]:
+                        self.e_pos.append([xidx, yidx])
+                    elif char == "B":
+                        pygame.draw.rect(self.background, BLACK, (xidx*self.cell_width, yidx*self.cell_height, self.cell_width, self.cell_height))
+        
+    def make_enemies(self):
         for idx, pos in enumerate(self.e_pos):
-            self.enemies.append(Enemy(self,pos), idx))
+            self.enemies.append(Enemy(self,vec(pos), idx))
             
-     def draw_grid(self):
+    def draw_grid(self):
         for x in range(WIDTH//self.cell_width):
             pygame.draw.line(self.background, GREY, (x*self.cell_width, 0),
                              (x*self.cell_width, HEIGHT))
@@ -86,8 +89,7 @@ class App:
                              (WIDTH, x*self.cell_height))
         #This is to tell the collour of walls or coins
         #for coin in self.walls:
-           pygame.draw.rect(self.background, (167, 179, 34), (coin.x*self.cell_width,
-                                                                coin.y*self.cell_height, self.cell_width, self.cell_height))
+        #pygame.draw.rect(self.background, (167, 179, 34), (coin.x*self.cell_width, coin.y*self.cell_height, self.cell_width, self.cell_height))
     def reset(self):
         self.player.lives = 3
         self.player.current_score = 0
@@ -100,7 +102,7 @@ class App:
             enemy.direction *= 0
 
         self.coins = []
-        with open("walls.txt", 'r') as file:
+        with open("wall.txt", 'r') as file:
             for yidx, line in enumerate(file):
                 for xidx, char in enumerate(line):
                     if char == 'C':
@@ -145,7 +147,7 @@ class App:
 
 
     def playing_update(self):
-        self.player.updates()
+        self.player.update()
         for enemy in self.enemies:
             enemy.update()
 
@@ -154,9 +156,9 @@ class App:
                 self.remove_life()
                 
                 
-       def playing_draw(self):
+    def playing_draw(self):
         self.screen.fill(BLACK)
-        self.screen.blit(self.background, (TOP_BOTTOM_BUFFER//2, TOP_BOTTOM_BUFFER//2))
+        self.screen.blit(self.background, (Top_Bottom_Buffer//2, Top_Bottom_Buffer//2))
         self.draw_coins()
         # self.draw_grid()
         self.draw_text('CURRENT SCORE: {}'.format(self.player.current_score),
@@ -183,8 +185,8 @@ class App:
     def draw_coins(self):
         for coin in self.coins:
             pygame.draw.circle(self.screen, (124, 123, 7),
-                               (int(coin.x*self.cell_width)+self.cell_width//2+TOP_BOTTOM_BUFFER//2,
-                                int(coin.y*self.cell_height)+self.cell_height//2+TOP_BOTTOM_BUFFER//2), 5)
+                               (int(coin.x*self.cell_width)+self.cell_width//2+Top_Bottom_Buffer//2,
+                                int(coin.y*self.cell_height)+self.cell_height//2+Top_Bottom_Buffer//2), 5)
 
 ########################### GAME OVER FUNCTIONS ################################
 
