@@ -75,7 +75,7 @@ class App:
         #print(len(self.walls))
      def make_enemies(self):
         for idx, pos in enumerate(self.e_pos):
-            self.enemies.append(Enemy(self,pos))
+            self.enemies.append(Enemy(self,pos), idx))
             
      def draw_grid(self):
         for x in range(WIDTH//self.cell_width):
@@ -88,6 +88,24 @@ class App:
         #for coin in self.walls:
            pygame.draw.rect(self.background, (167, 179, 34), (coin.x*self.cell_width,
                                                                 coin.y*self.cell_height, self.cell_width, self.cell_height))
+    def reset(self):
+        self.player.lives = 3
+        self.player.current_score = 0
+        self.player.grid_pos = vec(self.player.starting_pos)
+        self.player.pix_pos = self.player.get_pix_pos()
+        self.player.direction *= 0
+        for enemy in self.enemies:
+            enemy.grid_pos = vec(enemy.starting_pos)
+            enemy.pix_pos = enemy.get_pix_pos()
+            enemy.direction *= 0
+
+        self.coins = []
+        with open("walls.txt", 'r') as file:
+            for yidx, line in enumerate(file):
+                for xidx, char in enumerate(line):
+                    if char == 'C':
+                        self.coins.append(vec(xidx, yidx))
+        self.state = "playing"
 
 ########################## intro functions ###############################
     
@@ -128,21 +146,67 @@ class App:
 
     def playing_update(self):
         self.player.updates()
+        for enemy in self.enemies:
+            enemy.update()
 
-    def playing_draw(self):
-        self.screen.fill(RED)
+        for enemy in self.enemies:
+            if enemy.grid_pos == self.player.grid_pos:
+                self.remove_life()
+                
+                
+       def playing_draw(self):
+        self.screen.fill(BLACK)
         self.screen.blit(self.background, (TOP_BOTTOM_BUFFER//2, TOP_BOTTOM_BUFFER//2))
         self.draw_coins()
-        #self.draw_grid()
-         self.draw_text('CURRENT SCORE: {}'.format(self.player.current_score),
+        # self.draw_grid()
+        self.draw_text('CURRENT SCORE: {}'.format(self.player.current_score),
                        self.screen, [60, 0], 18, WHITE, START_FONT)
         self.draw_text('HIGH SCORE: 0', self.screen, [WIDTH//2+60, 0], 18, WHITE, START_FONT)
         self.player.draw()
-        pygame.display.updates()
+        for enemy in self.enemies:
+            enemy.draw()
+        pygame.display.update()
+
+    def remove_life(self):
+        self.player.lives -= 1
+        if self.player.lives == 0:
+            self.state = "game over"
+        else:
+            self.player.grid_pos = vec(self.player.starting_pos)
+            self.player.pix_pos = self.player.get_pix_pos()
+            self.player.direction *= 0
+            for enemy in self.enemies:
+                enemy.grid_pos = vec(enemy.starting_pos)
+                enemy.pix_pos = enemy.get_pix_pos()
+                enemy.direction *= 0
+
     def draw_coins(self):
         for coin in self.coins:
             pygame.draw.circle(self.screen, (124, 123, 7),
                                (int(coin.x*self.cell_width)+self.cell_width//2+TOP_BOTTOM_BUFFER//2,
                                 int(coin.y*self.cell_height)+self.cell_height//2+TOP_BOTTOM_BUFFER//2), 5)
-        
 
+########################### GAME OVER FUNCTIONS ################################
+
+    def game_over_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.reset()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.running = False
+
+    def game_over_update(self):
+        pass
+
+    def game_over_draw(self):
+        self.screen.fill(BLACK)
+        quit_text = "Press the escape button to QUIT"
+        again_text = "Press SPACE bar to PLAY AGAIN"
+        self.draw_text("GAME OVER", self.screen, [WIDTH//2, 100],  52, RED, "arial", centered=True)
+        self.draw_text(again_text, self.screen, [
+                       WIDTH//2, HEIGHT//2],  36, (190, 190, 190), "arial", centered=True)
+        self.draw_text(quit_text, self.screen, [
+                       WIDTH//2, HEIGHT//1.5],  36, (190, 190, 190), "arial", centered=True)
+        pygame.display.update()
