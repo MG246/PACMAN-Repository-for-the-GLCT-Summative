@@ -13,22 +13,21 @@ class Player:
         self.stored_direction = None
         self.able_to_move = True
         self.current_score = 0
-
+        self.speed = 2
+        self.lives = 1
 
     def update(self): #my update function
-        self.pix_pos == self.direction
-        if int(self.pix_pos.x + Top_Bottom_Buffer//2) % self.app.cell_width == 0:
-            if self.direction == vec(1,0) or self.direction == vec(-1,0):
-                if self.direction != None:
-                    self.direction = self.stored_direction
-        #
-        if int(self.pix_pos.x + Top_Bottom_Buffer//2) % self.app.cell_heigth == 0:
-            if self.direction == vec(0,1) or self.direction == vec(0,-1):
-                if self.direction != None:
-                    self.direction = self.stored_direction
-        # I am setting gird position in reference to the pixel position
-        self.grid_pos[0] = (self.pix_pos[0] - Top_Bottom_Buffer + self.app.cell_width//2)//self.app.cell_width + 1      
-        self.grid_pos[1] = (self.pix_pos[1] - Top_Bottom_Buffer + self.app.cell_height//2)//self.app.cell_height + 1
+        if self.able_to_move:
+            self.pix_pos += self.direction*self.speed
+        if self.time_to_move():
+            if self.stored_direction != None:
+                self.direction = self.stored_direction
+            self.able_to_move = self.can_move()
+        # Setting grid position in reference to pix pos
+        self.grid_pos[0] = (self.pix_pos[0]-TOP_BOTTOM_BUFFER +
+                            self.app.cell_width//2)//self.app.cell_width+1
+        self.grid_pos[1] = (self.pix_pos[1]-TOP_BOTTOM_BUFFER +
+                            self.app.cell_height//2)//self.app.cell_height+1
         if self.on_coin():
             self.eat_coin()
             
@@ -51,9 +50,9 @@ class Player:
         else:
             return False
                   
-    def eat_coin(self)
+    def eat_coin(self):
          self.app.coins.remove(self.gid_pos)
-         self.current_score = 1
+         self.current_score += 1
     def move(self,direction):#my move function
         self.stored_direction = direction
 
@@ -69,4 +68,8 @@ class Player:
         if int(self.pix_pos.y+TOP_BOTTOM_BUFFER//2) % self.app.cell_height == 0:
             if self.direction == vec(0, 1) or self.direction == vec(0, -1) or self.direction == vec(0, 0):
                 return True
-        
+           def can_move(self):
+        for wall in self.app.walls:
+            if vec(self.grid_pos+self.direction) == wall:
+                return False
+        return True
